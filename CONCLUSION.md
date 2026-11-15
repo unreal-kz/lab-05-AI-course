@@ -21,7 +21,7 @@ Give the numbers before -> after for that layer (correct / wrong / no answer, ou
 whether it changed what the agent *can do* or only what it *admits*. If no layer changed the
 number of correct answers, say so and explain what the layers did change instead.
 
-(write here)
+Layer 1 changed my results the most. The bare agent got 16 correct, 4 wrong and 4 with no answer out of 24. With layer 1 it got 18 correct, 6 wrong and 0 with no answer. It was the only layer that raised the number of correct answers, so it changed what the agent can do. Before it, the loop stopped at the first tool error, so all four alias questions had no answer. With layer 1 the model read the error and tried again, q23 and q24 became correct, but q21 and q22 became wrong. Layer 2 changed nothing and used the same 62 model calls. Layer 3 kept 18 correct but turned two wrong answers into no answer, so it only changed what the agent admits.
 
 ## 2. One failure the full harness did not fix
 
@@ -30,7 +30,7 @@ Pick one question that the full harness (layer 3) still gets wrong or refuses. G
 the model do instead? Name one thing you would add to the harness, and what it would cost
 (extra model calls, tokens, time, or a new way to fail).
 
-(write here)
+I picked q18, which asks by how many percentage points CPI in Jambyl fell between 2022 and 2025. With layer 3 it has no answer. The first step was right, get_series returned 16.1 for 2022 and 10.6 for 2025. The second step went wrong. The model asked calculate for 16.1 minus 10.6, divided by 100, and got 0.055, but a change in percentage points is just the difference of the two values, with no division. Then it wrote 0.55, which no tool returned, so grounding rejected it. It repeated the same mistake when asked to fix it and ended as unverified. Grounding caught it only by luck, because 0.055 would have passed. I would add a check that a pp answer is just one value minus the other. It costs one more check and sometimes one more model call, and it could wrongly reject a correct answer written another way.
 
 ## 3. Workflow or agent for the monthly ranking?
 
@@ -39,7 +39,7 @@ indicator in one year". Would you ship the fixed workflow or the agent? Use the 
 number of model calls, the tokens and the time you measured in Part 1. Then say in one sentence
 what kind of question would make you choose the other one.
 
-(write here)
+I would ship the fixed workflow. On the 15 fixed questions the workflow got 13 correct, 0 wrong and 2 with no answer, using 15 model calls, 3852 tokens and 17.9 seconds. The bare agent got 9 correct, 2 wrong and 4 with no answer, using 26 model calls, 19835 tokens and 65.8 seconds. The agent's two wrong answers were the rank questions q08 and q11, exactly the monthly ranking kind, and it got them wrong even with layer 3. The workflow never gave a wrong answer. It only gave no answer on two alias names, and a report with a gap is better than one with the wrong region. I would choose the agent for questions that need several steps, like a change across years, where no fixed template exists.
 
 ---
 
